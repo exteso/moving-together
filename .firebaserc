@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "movingtogether-fll": {
+      "hosting": {
+        "app": [
+          "movingtogether-fll"
+        ]
+      }
+    }
+  }
+}
