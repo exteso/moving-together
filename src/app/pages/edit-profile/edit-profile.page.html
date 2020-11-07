@@ -1,0 +1,118 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button text="" icon="add" defaultHref="folder/Inbox"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+        Edit Profile
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding animated fadeIn login auth-page">
+  
+  <div class="auth-content">
+
+    <!-- Edit profile form -->
+    <form [formGroup]="profileForm" (keydown)="keyDownFunction($event)" class="list-form">
+      <ion-item lines="none" class="ion-no-padding animated fadeInUp">
+        <ion-label position="floating">
+          <ion-icon name="list" item-start></ion-icon>
+          {{ 'auth.form.firstName'  }}
+        </ion-label>
+        <ion-input color="secondary" type="text" formControlName="firstName"></ion-input>
+      </ion-item>
+      <p class="text08 msg" *ngIf="f.firstName.errors && hasError">
+        <ion-text color="danger" *ngIf="f.firstName.errors.required">
+          {{ 'auth.form.error.firstName'  }}
+        </ion-text>
+      </p>
+
+      <ion-item lines="none" class="ion-no-padding animated fadeInUp">
+        <ion-label position="floating">
+          <ion-icon name="list" item-start></ion-icon>
+          {{ 'auth.form.lastName'  }}
+        </ion-label>
+        <ion-input color="secondary" type="text" formControlName="lastName"></ion-input>
+      </ion-item>
+      <p class="text08 msg" *ngIf="f.lastName.errors && hasError">
+        <ion-text color="danger" *ngIf="f.lastName.errors.required">
+          {{ 'auth.form.error.lastName'  }}
+        </ion-text>
+      </p>
+
+      <ion-item lines="none" class="ion-no-padding animated fadeInUp">
+        <ion-label position="floating">
+          <ion-icon name="people" item-start></ion-icon>
+          
+          {{ 'auth.form.providerId'  }}
+        </ion-label>
+        <ion-input color="secondary" type="text" formControlName="providerId"></ion-input>
+      </ion-item>
+      <p class="text08 msg" *ngIf="f.providerId.errors && hasError">
+        <ion-text color="danger" *ngIf="f.providerId.errors.required">
+          {{ 'auth.form.error.providerId'  }}
+        </ion-text>
+      </p>
+  
+      <ion-item lines="none" class="ion-no-padding animated fadeInUp">
+        <ion-label position="floating">
+          <ion-icon name="people" item-start></ion-icon>
+          
+          {{ 'auth.form.providerUserId'  }}
+        </ion-label>
+        <ion-input color="secondary" type="text" formControlName="providerUserId"></ion-input>
+      </ion-item>
+      <p class="text08 msg" *ngIf="f.providerUserId.errors && hasError">
+        <ion-text color="danger" *ngIf="f.providerUserId.errors.required">
+          {{ 'auth.form.error.providerUserId'  }}
+        </ion-text>
+      </p>
+
+        <ion-item lines="none" class="ion-no-padding animated fadeInUp">
+          <ion-label position="floating">
+            <ion-icon name="people" item-start></ion-icon>
+            {{ 'auth.form.teamId'  }}
+          </ion-label>
+          <ion-input color="secondary" type="text" formControlName="teamId"></ion-input>
+        </ion-item>
+        <p class="text08 msg" *ngIf="f.teamId.errors && hasError">
+          <ion-text color="danger" *ngIf="f.teamId.errors.required">
+            {{ 'auth.form.error.teamId'  }}
+          </ion-text>
+        </p>
+
+      <ion-item lines="none" class="ion-no-padding animated fadeInUp">
+        <ion-label position="floating">
+          <ion-icon name="mail" item-start></ion-icon>
+          {{ 'auth.form.email'  }}
+        </ion-label>
+        <ion-input color="secondary" type="email" formControlName="email"></ion-input>
+      </ion-item>
+      <p class="text08 msg" *ngIf="f.email.errors && hasError">
+        <ion-text color="danger" *ngIf="f.email.errors.required">
+          {{ 'auth.form.error.email'  }}
+        </ion-text>
+        <ion-text color="danger" *ngIf="f.email.errors.email"> 
+          {{ 'auth.form.error.email.isvalid'  }}
+        </ion-text>
+      </p>
+
+      <div class="ion-margin-top">
+        <ion-button size="medium" expand="full" shape="round" color="dark" (click)="linkWithFitbit()">
+          <!-- [disabled]="isOffline" -->
+          <ion-icon name="link" slot="end"></ion-icon>
+          Link with Fitbit
+        </ion-button>
+        <ion-button size="medium" expand="full" shape="round" color="dark" (click)="editProfile(profileForm)">
+          <!-- [disabled]="isOffline" -->
+          <ion-icon name="create" slot="end"></ion-icon>
+          {{ 'auth.button.create'  }}
+        </ion-button>
+      </div>
+
+    </form>
+
+  </div>
+
+</ion-content>
