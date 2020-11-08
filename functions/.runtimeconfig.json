@@ -4,7 +4,7 @@
       "id": "22C2GT",
       "key": "f13c20163b190ad3e325826ef207655a",
       "authorizationcode": {
-        "redirecturl": "http://localhost:8100/movingtogether-fll/us-central1/linkFitbitUser"
+        "redirecturl": "http://localhost:5001/movingtogether-fll/us-central1/linkFitbitUser"
       }
     }
   },
