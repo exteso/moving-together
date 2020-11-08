@@ -1,6 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { DOCUMENT } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -9,17 +10,25 @@ import { DOCUMENT } from '@angular/common';
 })
 export class RegisterPage implements OnInit {
 
+  token: string;
   providerId: string;
   providerUserId: string;
   
-  constructor(@Inject(DOCUMENT) readonly document: Document) { }
+  constructor(private route: ActivatedRoute, @Inject(DOCUMENT) readonly document: Document) { }
 
   /** The Window object from Document defaultView */
   get window(): Window { return this.document.defaultView; }
+
   ngOnInit() {
+    this.route.fragment.subscribe(
+      (fragment) => {
+        let searchParam = new URLSearchParams(fragment);
+        this.token = searchParam.get('access_token');
+        this.providerUserId = searchParam.get('user_id');
+      });
   }
 
-  public linkWithFitbit(): void {
+  public linkWithFitbitServerSide(): void {
     // Authorization Code Grant Flow:
     // https://www.fitbit.com/oauth2/authorize?response_type=code&client_id=22942C&redirect_uri=https%3A%2F%2Fexample.com%2Ffitbit_auth&scope=activity%20nutrition%20heartrate%20location%20nutrition%20profile%20settings%20sleep%20social%20weight
 
@@ -34,6 +43,22 @@ export class RegisterPage implements OnInit {
     } else {
       //fitbitLoginUrl += '&redirect_uri=http%3A%2F%2Flocalhost:5001%2Fmovingtogether-fll%2Fus-central1%2FlinkFitbitUser';
       fitbitLoginUrl += '&redirect_uri=http%3A%2F%2Flocalhost:5001%2Fmovingtogether-fll%2Fus-central1%2FlinkFitbitUser';
+    }
+    fitbitLoginUrl += '&scope=activity%20profile&expires_in=604800'
+    this.redirect(fitbitLoginUrl, '_self');
+  }
+
+
+  public linkWithFitbit(): void {
+    //https://www.fitbit.com/oauth2/authorize?response_type=token&client_id=22942C&redirect_uri=https%3A%2F%2Fexample.com%2Ffitbit_auth&scope=activity%20nutrition%20heartrate%20location%20nutrition%20profile%20settings%20sleep%20social%20weight&expires_in=604800
+    const clientId="22BZT8";
+    let fitbitLoginUrl = 'https://www.fitbit.com/oauth2/authorize?response_type=token&client_id='+clientId;
+    if (environment.production) {
+      //fitbitLoginUrl += '&redirect_uri=https%3A%2F%2Fus-central1-movingtogether-fll.cloudfunctions.net%2FlinkFitbitUser'
+      fitbitLoginUrl += '&redirect_uri=https%3A%2F%2Fmovingtogether-fll.web.app%2Ftracker%2Fregister'
+    } else {
+      //fitbitLoginUrl += '&redirect_uri=http%3A%2F%2Flocalhost:5001%2Fmovingtogether-fll%2Fus-central1%2FlinkFitbitUser';
+      fitbitLoginUrl += '&redirect_uri=http%3A%2F%2Flocalhost:8100%2Ftracker%2Fregister';
     }
     fitbitLoginUrl += '&scope=activity%20profile&expires_in=604800'
     this.redirect(fitbitLoginUrl, '_self');

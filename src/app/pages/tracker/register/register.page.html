@@ -16,6 +16,10 @@
     <ion-card-content>
       Your profile has a tracker registered with {{ providerId }} with user {{ providerUserId }}
     </ion-card-content>
+    <ion-item>
+      <ion-icon name="token" slot="start"></ion-icon>
+      <ion-label>{{ token }}</ion-label>
+    </ion-item>
   </ion-card>
 
   <ion-button (click)="linkWithFitbit()">Link a Fitbit</ion-button>
