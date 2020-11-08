@@ -1,0 +1,23 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start"> 
+      <ion-menu-button></ion-menu-button> 
+    </ion-buttons> 
+    <ion-title>Register your tracker</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card>
+    <ion-item>
+      <ion-icon name="pin" slot="start"></ion-icon>
+      <ion-label>Your tracker</ion-label>
+    </ion-item>
+    <ion-card-content>
+      Your profile has a tracker registered with {{ providerId }} with user {{ providerUserId }}
+    </ion-card-content>
+  </ion-card>
+
+  <ion-button (click)="linkWithFitbit()">Link a Fitbit</ion-button>
+
+</ion-content>

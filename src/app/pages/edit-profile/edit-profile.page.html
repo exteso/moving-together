@@ -1,7 +1,7 @@
 <ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
-      <ion-back-button text="" icon="add" defaultHref="folder/Inbox"></ion-back-button>
+  <ion-toolbar>
+    <ion-buttons slot="start"> 
+      <ion-menu-button></ion-menu-button> 
     </ion-buttons>
     <ion-title>
         Edit Profile
@@ -99,11 +99,6 @@
       </p>
 
       <div class="ion-margin-top">
-        <ion-button size="medium" expand="full" shape="round" color="dark" (click)="linkWithFitbit()">
-          <!-- [disabled]="isOffline" -->
-          <ion-icon name="link" slot="end"></ion-icon>
-          Link with Fitbit
-        </ion-button>
         <ion-button size="medium" expand="full" shape="round" color="dark" (click)="editProfile(profileForm)">
           <!-- [disabled]="isOffline" -->
           <ion-icon name="create" slot="end"></ion-icon>
