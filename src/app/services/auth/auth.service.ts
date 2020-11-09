@@ -28,7 +28,7 @@ export class AuthService {
     private afAuth: AngularFireAuth,
     private firestore: FirestoreService,
   ) { 
-    this.user$ = this.afAuth.authState.pipe(
+    this.user$ = this.afAuth.user.pipe(
       switchMap((user) => {
         if (user) {
           return this.firestore.getUser(user.uid);

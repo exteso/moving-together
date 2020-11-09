@@ -2,6 +2,9 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { AuthService } from 'src/app/services';
+import { User } from 'src/app/models';
+import { AngularFirestore } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-register',
@@ -14,19 +17,48 @@ export class RegisterPage implements OnInit {
   providerId: string;
   providerUserId: string;
   
-  constructor(private route: ActivatedRoute, @Inject(DOCUMENT) readonly document: Document) { }
+  constructor(private authService: AuthService, private afs: AngularFirestore, private route: ActivatedRoute, @Inject(DOCUMENT) readonly document: Document) { }
 
   /** The Window object from Document defaultView */
   get window(): Window { return this.document.defaultView; }
 
   ngOnInit() {
+
+    let user$ = this.authService.user$;
     this.route.fragment.subscribe(
       (fragment) => {
         let searchParam = new URLSearchParams(fragment);
         this.token = searchParam.get('access_token');
-        this.providerUserId = searchParam.get('user_id');
+        let providerUserId = searchParam.get('user_id');
+        this.providerUserId = providerUserId;
+        this.authService.user$.subscribe(user => {
+          return this.afs.doc<User>(`/users/${user.userId}`).update({providerUserId});
+        })
       });
+
+    
   }
+
+
+/*
+let user$ = this.authService.user$;
+    let fragment$ = this.route.fragment;
+    combineLatest([user$, fragment$]).pipe(
+      filter(([user, fragment]) => {
+        return (!!user && !!fragment )
+      }),
+      map(([user, fragment]) => {
+        let searchParam = new URLSearchParams(fragment);
+        let token = searchParam.get('access_token');
+        let providerUserId = searchParam.get('user_id');
+        return [user, providerUserId ];
+      }),
+
+      flatMap(([user, providerUserId]: [User, string]) => {
+        return this.afs.doc<User>(`/users/${user.userId}`).update({providerUserId});
+      })
+    ).subscribe((user) => { console.log(user) });
+    */
 
   public linkWithFitbitServerSide(): void {
     // Authorization Code Grant Flow:
