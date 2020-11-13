@@ -5,6 +5,8 @@ import { ActivatedRoute } from '@angular/router';
 import { AuthService } from 'src/app/services';
 import { User } from 'src/app/models';
 import { AngularFirestore } from '@angular/fire/firestore';
+import { AngularFireFunctions } from '@angular/fire/functions';
+import { filter, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-register',
@@ -17,7 +19,7 @@ export class RegisterPage implements OnInit {
   providerId: string;
   providerUserId: string;
   
-  constructor(private authService: AuthService, private afs: AngularFirestore, private route: ActivatedRoute, @Inject(DOCUMENT) readonly document: Document) { }
+  constructor(private fns: AngularFireFunctions, private authService: AuthService, private afs: AngularFirestore, private route: ActivatedRoute, @Inject(DOCUMENT) readonly document: Document) { }
 
   /** The Window object from Document defaultView */
   get window(): Window { return this.document.defaultView; }
@@ -28,15 +30,19 @@ export class RegisterPage implements OnInit {
     this.route.fragment.subscribe(
       (fragment) => {
         let searchParam = new URLSearchParams(fragment);
-        this.token = searchParam.get('access_token');
-        let providerUserId = searchParam.get('user_id');
-        this.providerUserId = providerUserId;
-        this.authService.user$.subscribe(user => {
-          return this.afs.doc<User>(`/users/${user.userId}`).update({providerUserId});
-        })
+        let token = searchParam.get('access_token');
+        if (token) {
+          this.token = token;
+          let providerUserId = searchParam.get('user_id');
+          this.providerUserId = providerUserId;
+          return this.authService.user$.pipe(
+            filter(user => !!user)
+          ).subscribe(user => {
+            const callable = this.fns.httpsCallable('getFitbitUserProfile');
+            return callable({ token, providerUserId }).subscribe(userProfile => console.log(userProfile));
+          });
+        }
       });
-
-    
   }
 
 

@@ -13,6 +13,10 @@
         "function": "linkFitbitUser"
       },
       {
+        "source": "/movingtogether-fll/us-central1/getFitbitUserProfile",
+        "function": "getFitbitUserProfile"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
