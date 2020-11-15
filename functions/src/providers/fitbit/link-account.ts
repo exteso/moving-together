@@ -41,15 +41,24 @@ async function getToken(code: any, redirectUri: string): Promise<any> {
     
     return response;
   }
+  
+  async function subscribeToFitbit(uid: string, data: any, token: any){
+    return postToFitbitApi(`https://api.fitbit.com/1/user/-/activities/apiSubscriptions/${uid}.json?subscriberId=1`, data, token);
+  }
+
+  async function unsubscribeFromFitbit(uid: string, token: any){
+    return deleteToFitbitApi(`https://api.fitbit.com/1/user/-/activities/apiSubscriptions/${uid}.json?subscriberId=1`, token);
+  }
+  
   /*
   async function getFitbitProfile(token: any): Promise<any> {
     return callFitbitApi("https://api.fitbit.com/1/user/-/profile.json", token);
   }
-  */
+ */
   async function getFitbitSteps(providerUserId: string, token: any): Promise<any> {
     return callFitbitApi(`https://api.fitbit.com/1/user/${providerUserId}/activities/steps/date/today/7d.json`, token);
   }
-  
+
   async function callFitbitApi(url: string, token: any): Promise<any> {
 
     let response = {};
@@ -69,6 +78,88 @@ async function getToken(code: any, redirectUri: string): Promise<any> {
     
     return response;
   }
+ 
+  async function postToFitbitApi(url: string, data: any, token: any): Promise<any> {
+
+    let response = {};
+
+    const options: AxiosRequestConfig =  
+                {
+                  headers: { 
+                    Authorization: `Bearer ${token}`,
+                    'content-type': 'application/x-www-form-urlencoded' },
+                };
+  
+    await axios.post(url, data, options)
+        .then((body) => response = body.data)
+        .catch ((err) => { 
+          functions.logger.error(err);
+          response = { "err": err.toString() }; });
+    
+    return response;
+  }
+
+  async function deleteToFitbitApi(url: string, token: any): Promise<any> {
+
+    let response = {};
+
+    const options: AxiosRequestConfig =  
+                {
+                  headers: { 
+                    Authorization: `Bearer ${token}`,
+                    'content-type': 'application/x-www-form-urlencoded' },
+                };
+  
+    await axios.delete(url, options)
+        .then((body) => response = body.data)
+        .catch ((err) => { 
+          functions.logger.error(err);
+          response = { "err": err.toString() }; });
+    
+    return response;
+  }
+
+  // As described in https://dev.fitbit.com/build/reference/web-api/subscriptions/
+  // FITBIT servers POST to https://us-central1-movetogether-fll.cloudfunctions.net/addFitbitSubscriptionMessage
+  export const addFitbitSubscriptionMessage = functions.https.onRequest(async (req, res) => {
+    // Check for POST request
+    if(req.method !== "POST"){
+      // fitbit servers verify the subscription API with a special GET call 
+      // see https://dev.fitbit.com/build/reference/web-api/subscriptions/#verify-a-subscriber
+      const verifyCode = req.query.verify;
+      if (verifyCode) {
+          if (verifyCode === '492d17818760969fb6b63415c019a8884d7f2b8facea0d619cec492b39d87eff') {
+              res.status(204).send('VerifyCode OK'); 
+              return;       
+          }else{
+              res.status(404).send('Wrong VerifyCode');
+              return;
+          }
+      } 
+
+      res.status(400).send('Please send a POST request');
+      return;
+    }
+    // Grab the request payload.
+    const data = req.body;
+
+    functions.logger.info("Received a new message from FITBIT server (see next log message): ", {structuredData: true});
+    functions.logger.info(data, {structuredData: true});
+
+    const uid = data.subscriptionId;
+    const providerUserId = data.ownerId
+    const user: any = await admin.firestore().doc('users/'+uid)
+
+    const steps = await getFitbitSteps(providerUserId, user.token);
+    functions.logger.info(`Received steps for subscription ${uid} from FITBIT server (see next log message): `, {structuredData: true});
+    functions.logger.info( steps, {structuredData: true});
+
+    // Push the new message into Cloud Firestore using the Firebase Admin SDK.
+    const writeResult = await admin.firestore().collection('fitbit/'+uid+'/steps').add(steps);
+
+    // Send back a message that we've succesfully written the message
+    res.status(204).json({result: `FitBit message added with ID: ${writeResult.id}.`});
+  });
 
   export const linkFitbitUser = functions.https.onRequest(async (req, res) => {
     // Grab the request payload.
@@ -92,12 +183,13 @@ async function getToken(code: any, redirectUri: string): Promise<any> {
     res.redirect(301, homepageUrl);
   });
 
-  export const getFitbitUserProfile = functions.https.onCall(async (data, context) => {
+  export const subscribeToTrackerProvider = functions.https.onCall(async (data, context) => {
 
     // Message text passed from the client.
     const token = data.token;
+    const providerId = data.providerId;
     const providerUserId = data.providerUserId;
-    functions.logger.info(`Token ${token} & ProviderUserID ${providerUserId}`, {structuredData: true});
+    functions.logger.info(`Token ${token}, ProviderID ${providerId}, ProviderUserID ${providerUserId}`, {structuredData: true});
       
     // Authentication / user information is automatically added to the request.
     
@@ -106,19 +198,38 @@ async function getToken(code: any, redirectUri: string): Promise<any> {
       const email = context.auth.token.email || null;
 
       //const userProfile = await getFitbitProfile(token);  
-      await admin.firestore().doc('users/'+uid).update({providerUserId});
-      functions.logger.info(`Linked User ${email} with fitbit profile ${providerUserId}`);
+      functions.logger.info(`Linked User ${email} with ${providerId} profile ${providerUserId}`);
     
       //const name = context.auth.token.name || null;
       //const picture = context.auth.token.picture || null;
       //const email = context.auth.token.email || null;
        // Push the new message into Cloud Firestore using the Firebase Admin SDK.
+       let subscription;
+       switch(providerUserId){
+        case 'unsubscribe': {
+          subscription = await unsubscribeFromFitbit(uid, token);
+          break;
+        }
+        default : {
+          subscription = await subscribeToFitbit(uid, null, token);
+          break;
+        }
+      }
+      functions.logger.info(`Subscription received for profile ${providerUserId} from Fitbit server`);
+      functions.logger.info(subscription);
+      await admin.firestore().doc('users/'+uid).update({token, providerUserId, subscription});
       
-      const steps = await getFitbitSteps(providerUserId, token)
-      functions.logger.info(`Steps received for profile ${providerUserId} from Fitbit server`);
-      functions.logger.info(steps);
+      const steps: any = await getFitbitSteps(providerUserId, token);
+      functions.logger.info(`Received steps for subscription ${uid} from FITBIT server (see next log message): `, {structuredData: true});
+      functions.logger.info( steps, {structuredData: true});
+  
+      const stepsArray: [] = steps['activities-steps'];
+      // Push the new message into Cloud Firestore using the Firebase Admin SDK.
+      await stepsArray.forEach((doc:any) => {
+        return admin.firestore().doc('fitbit/'+uid+'/steps/'+doc.dateTime).set(doc);
+      });
 
-      return { steps };
+      return { stepsArray };
     }else{
       functions.logger.error("Received userProfile but no user logged in MovingTogether");
       

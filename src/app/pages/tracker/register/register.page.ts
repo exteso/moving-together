@@ -7,6 +7,7 @@ import { User } from 'src/app/models';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireFunctions } from '@angular/fire/functions';
 import { filter, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -15,6 +16,7 @@ import { filter, tap } from 'rxjs/operators';
 })
 export class RegisterPage implements OnInit {
 
+  user$: Observable<User>;
   token: string;
   providerId: string;
   providerUserId: string;
@@ -26,45 +28,31 @@ export class RegisterPage implements OnInit {
 
   ngOnInit() {
 
-    let user$ = this.authService.user$;
+    this.user$ = this.authService.user$;
     this.route.fragment.subscribe(
       (fragment) => {
         let searchParam = new URLSearchParams(fragment);
         let token = searchParam.get('access_token');
         if (token) {
           this.token = token;
+          let providerId = 'fitbit';
           let providerUserId = searchParam.get('user_id');
           this.providerUserId = providerUserId;
           return this.authService.user$.pipe(
             filter(user => !!user)
           ).subscribe(user => {
-            const callable = this.fns.httpsCallable('getFitbitUserProfile');
-            return callable({ token, providerUserId }).subscribe(userProfile => console.log(userProfile));
+            const callable = this.fns.httpsCallable('subscribeToTrackerProvider');
+            return callable({ token, providerId, providerUserId }).subscribe(subscription => console.log(subscription));
           });
         }
       });
   }
 
+  removeSubscription(token, providerId, providerUserId){
+    const callable = this.fns.httpsCallable('subscribeToTrackerProvider');
+    return callable({ token, providerId, providerUserId:'unsubscribe' }).subscribe(subscription => console.log(subscription));
 
-/*
-let user$ = this.authService.user$;
-    let fragment$ = this.route.fragment;
-    combineLatest([user$, fragment$]).pipe(
-      filter(([user, fragment]) => {
-        return (!!user && !!fragment )
-      }),
-      map(([user, fragment]) => {
-        let searchParam = new URLSearchParams(fragment);
-        let token = searchParam.get('access_token');
-        let providerUserId = searchParam.get('user_id');
-        return [user, providerUserId ];
-      }),
-
-      flatMap(([user, providerUserId]: [User, string]) => {
-        return this.afs.doc<User>(`/users/${user.userId}`).update({providerUserId});
-      })
-    ).subscribe((user) => { console.log(user) });
-    */
+  }
 
   public linkWithFitbitServerSide(): void {
     // Authorization Code Grant Flow:
@@ -79,7 +67,6 @@ let user$ = this.authService.user$;
       //fitbitLoginUrl += '&redirect_uri=https%3A%2F%2Fus-central1-movingtogether-fll.cloudfunctions.net%2FlinkFitbitUser'
       fitbitLoginUrl += '&redirect_uri=https%3A%2F%2Fmovingtogether-fll.web.app%2Fmovingtogether-fll%2Fus-central1%2FlinkFitbitUser'
     } else {
-      //fitbitLoginUrl += '&redirect_uri=http%3A%2F%2Flocalhost:5001%2Fmovingtogether-fll%2Fus-central1%2FlinkFitbitUser';
       fitbitLoginUrl += '&redirect_uri=http%3A%2F%2Flocalhost:5001%2Fmovingtogether-fll%2Fus-central1%2FlinkFitbitUser';
     }
     fitbitLoginUrl += '&scope=activity%20profile&expires_in=604800'
