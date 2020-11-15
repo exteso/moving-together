@@ -4,6 +4,8 @@ import * as qs from 'qs';
 import axios, { AxiosRequestConfig } from 'axios';
 import { HttpsError } from 'firebase-functions/lib/providers/https';
 
+var tools = require('firebase-tools');
+
 /**
  * This is an asynchronous function that uses async-await with request-promise
  * to fetch a result from Fitbit web server.
@@ -208,28 +210,33 @@ async function getToken(code: any, redirectUri: string): Promise<any> {
        switch(providerUserId){
         case 'unsubscribe': {
           subscription = await unsubscribeFromFitbit(uid, token);
+          await tools.firestore.delete('/fitbit/'+uid, {
+            project: process.env.GCLOUD_PROJECT,
+            recursive: true,
+            yes: true,
+          }); 
           break;
         }
         default : {
           subscription = await subscribeToFitbit(uid, null, token);
+          const steps: any = await getFitbitSteps(providerUserId, token);
+          functions.logger.info(`Received steps for subscription ${uid} from FITBIT server (see next log message): `, {structuredData: true});
+          functions.logger.info( steps, {structuredData: true});
+      
+          const stepsArray: [] = steps['activities-steps'];
+          // Push the new message into Cloud Firestore using the Firebase Admin SDK.
+          await admin.firestore().doc('fitbit/'+uid).set({uid});
+          await stepsArray.forEach((doc:any) => {
+            return admin.firestore().doc('fitbit/'+uid+'/steps/'+doc.dateTime).set(doc);
+          });
           break;
         }
       }
       functions.logger.info(`Subscription received for profile ${providerUserId} from Fitbit server`);
       functions.logger.info(subscription);
       await admin.firestore().doc('users/'+uid).update({token, providerUserId, subscription});
-      
-      const steps: any = await getFitbitSteps(providerUserId, token);
-      functions.logger.info(`Received steps for subscription ${uid} from FITBIT server (see next log message): `, {structuredData: true});
-      functions.logger.info( steps, {structuredData: true});
-  
-      const stepsArray: [] = steps['activities-steps'];
-      // Push the new message into Cloud Firestore using the Firebase Admin SDK.
-      await stepsArray.forEach((doc:any) => {
-        return admin.firestore().doc('fitbit/'+uid+'/steps/'+doc.dateTime).set(doc);
-      });
 
-      return { stepsArray };
+      return { subscription };
     }else{
       functions.logger.error("Received userProfile but no user logged in MovingTogether");
       

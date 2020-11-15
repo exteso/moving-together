@@ -50,7 +50,7 @@ export class AuthService {
       this.fbSubscription = this.afAuth.authState.subscribe((user: firebase.User) => {
         // User is logged in on Firebase.
         if (user) {
-          this.firestore.get('users/' + user.uid).then(ref => {
+          this.firestore.get('/users/' + user.uid).then(ref => {
             if (this.fsSubscription) {
               this.fsSubscription.unsubscribe();
             }

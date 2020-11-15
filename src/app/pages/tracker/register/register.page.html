@@ -18,18 +18,26 @@
     </ion-card-content>
     <ion-item>
       <ion-icon name="key" slot="start"></ion-icon>
-      <ion-label>{{ user.subscription | json }}</ion-label>
+      <ion-label class="ion-text-wrap">{{ user.subscription | json }}</ion-label>
       <ion-button 
-            *ngIf="token" 
+            *ngIf="user.token" 
             color="danger" 
             size="small"
-            (click)="removeSubscription(token, user.providerId, user.providerUserId)">
+            (click)="removeSubscription(user.token, user.providerId, user.providerUserId)">
           <ion-icon slot="start" name="trash"></ion-icon>
           Remove
       </ion-button>
     </ion-item>
   </ion-card>
-
+<ion-list>
+  <ion-item *ngFor="let dailySteps of steps$ |async">
+    <ion-label>
+      <h3>{{dailySteps.dateTime}}</h3>
+      <h2>{{dailySteps.value}}</h2>
+    </ion-label>
+  </ion-item>
+  
+</ion-list>
   <ion-button (click)="linkWithFitbit()">Link a Fitbit</ion-button>
 
 </ion-content>

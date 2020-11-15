@@ -6,7 +6,7 @@ import { AuthService } from 'src/app/services';
 import { User } from 'src/app/models';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireFunctions } from '@angular/fire/functions';
-import { filter, tap } from 'rxjs/operators';
+import { filter, tap, switchMap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -17,6 +17,7 @@ import { Observable } from 'rxjs';
 export class RegisterPage implements OnInit {
 
   user$: Observable<User>;
+  steps$: Observable<any>;
   token: string;
   providerId: string;
   providerUserId: string;
@@ -29,6 +30,15 @@ export class RegisterPage implements OnInit {
   ngOnInit() {
 
     this.user$ = this.authService.user$;
+    this.steps$ = this.user$.pipe(
+      tap(user => console.log(user)),
+      switchMap(user => 
+       this.afs.collection<any>('/fitbit/'+user.userId+'/steps').valueChanges()
+      ),
+      tap(steps => {
+        console.log(steps)
+      })
+    );
     this.route.fragment.subscribe(
       (fragment) => {
         let searchParam = new URLSearchParams(fragment);

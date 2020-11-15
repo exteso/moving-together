@@ -29,7 +29,7 @@ export class FirestoreService {
   }
 
   public getUser(userId: string): Observable<User> {
-    return this.afs.doc<User>(`users/${userId}`).valueChanges();
+    return this.afs.doc<User>(`/users/${userId}`).valueChanges();
   }
 
   // Check if the object exists on Firestore. Returns a boolean promise with true/false.
@@ -47,12 +47,12 @@ export class FirestoreService {
 
   // Get all users on Firestore ordered by their firstNames.
   public getUsers(): AngularFirestoreCollection<User> {
-    return this.afs.collection('users', ref => ref.orderBy('firstName'));
+    return this.afs.collection('/users', ref => ref.orderBy('firstName'));
   }
 
   public getUserByUID(uid: string): Promise<User> {
     return new Promise(resolve => {
-      this.afs.collection('users', ref => ref.where('userId', '==', uid)).valueChanges().pipe(take(1)).subscribe((res: User[]) => {
+      this.afs.collection('/users', ref => ref.where('userId', '==', uid)).valueChanges().pipe(take(1)).subscribe((res: User[]) => {
         if (res.length > 0) {
           resolve(res[0]);
         } else {
