@@ -33,7 +33,9 @@ export class RegisterPage implements OnInit {
     this.steps$ = this.user$.pipe(
       tap(user => console.log(user)),
       switchMap(user => 
-       this.afs.collection<any>('/fitbit/'+user.userId+'/steps').valueChanges()
+       this.afs.collection<any>('/fitbit/'+user.userId+'/steps', 
+                                ref => ref.orderBy('dateTime', 'desc').limit(31))
+                                .valueChanges()
       ),
       tap(steps => {
         console.log(steps)

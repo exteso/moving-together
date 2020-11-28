@@ -4,9 +4,17 @@ service cloud.firestore {
   	match /users {
       allow read
       match /{user} {
-          allow read: if request.auth.uid == request.resource.id
-          allow write: if request.auth.uid == request.resource.id
+          allow read: if (request.auth.uid != null)
+          allow write: if (request.auth.uid != null)
       }
+    }
+    match /fitbit/{user} {
+        allow read
+        allow write: if ((request.auth.uid != null))
+    }
+    match /fitbit/{user}/{document=**} {
+        allow read
+        allow write: if ((request.auth.uid != null))
     }
     match /{document=**} {
       allow read, write: if false;
