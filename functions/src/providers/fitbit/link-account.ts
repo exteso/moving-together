@@ -143,24 +143,26 @@ async function getToken(code: any, redirectUri: string): Promise<any> {
       return;
     }
     // Grab the request payload.
-    const data = req.body;
+    const data = req.body[0];
 
     functions.logger.info("Received a new message from FITBIT server (see next log message): ", {structuredData: true});
     functions.logger.info(data, {structuredData: true});
 
     const uid = data.subscriptionId;
     const providerUserId = data.ownerId
-    const user: any = await admin.firestore().doc('users/'+uid)
-
+    const userSnapshot: any = await admin.firestore().doc('users/'+uid).get();
+    const user = userSnapshot.data();
     const steps = await getFitbitSteps(providerUserId, user.token);
     functions.logger.info(`Received steps for subscription ${uid} from FITBIT server (see next log message): `, {structuredData: true});
     functions.logger.info( steps, {structuredData: true});
 
     // Push the new message into Cloud Firestore using the Firebase Admin SDK.
-    const writeResult = await admin.firestore().collection('fitbit/'+uid+'/steps').add(steps);
+    await steps['activities-steps'].forEach((doc:any) => {
+      return admin.firestore().doc('fitbit/'+uid+'/steps/'+doc.dateTime).set(doc);
+    });
 
     // Send back a message that we've succesfully written the message
-    res.status(204).json({result: `FitBit message added with ID: ${writeResult.id}.`});
+    res.status(204).json({result: `Refresh data for user ${uid} with FitBit steps: ${steps}.`});
   });
 
   export const linkFitbitUser = functions.https.onRequest(async (req, res) => {
