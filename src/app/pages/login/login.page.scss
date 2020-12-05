@@ -26,5 +26,11 @@ ion-button {
 }
 
 .logo {
+    width: 92px;
+    height: 92px;
+    margin: 20px auto 8px;
+    border-radius: 50%;
+    background: url("/assets/icon/icon256.png") no-repeat;
+    background-size: 100%;
     box-shadow: 0 0 40px rgba(var(--ion-color-light-rgb), .7);
-}
+  }

@@ -6,11 +6,9 @@
     <div class="ion-padding-horizontal ion-text-center animated fadeInDown">
       <div class="logo"></div>
       <h2 class="ion-no-margin">
-        <ion-text color="light">
-          {{ 'home.card.titlea'  }}<ion-text class="fw700">{{ 'home.card.titleb'  }} </ion-text>
-          {{ 'home.card.version'  }}
-        </ion-text>
+        <ion-text color="light">MovingTogether v0.2</ion-text>
       </h2>
+      <ion-text color="light"><h5>uno per tutti, tutti per uno</h5></ion-text>
     </div>
 
     <!-- Login form -->
@@ -18,39 +16,39 @@
       <ion-item lines="none" class="ion-no-padding animated fadeInUp">
         <ion-label position="floating">
           <ion-icon name="mail" item-start></ion-icon>
-          {{ 'auth.form.email'  }}
+          Email
         </ion-label>
         <ion-input color="secondary" type="email" formControlName="email"></ion-input>
       </ion-item>
       <p class="ion-no-margin text08 msg" *ngIf="f.email.errors && hasError">
         <ion-text color="light" *ngIf="f.email.errors.required">
-          {{ 'auth.form.error.email'  }}
+          Email è un campo obbligatorio
         </ion-text>
         <ion-text color="light" *ngIf="f.email.errors.email"> 
-          {{ 'auth.form.error.email.isvalid'  }}
+          Email non valido
         </ion-text>
       </p>
 
       <ion-item lines="none" class="ion-no-padding animated fadeInUp">
         <ion-label position="floating">
           <ion-icon name="lock-closed-outline" item-start></ion-icon>
-          {{ 'auth.form.password'  }}
+          Password
         </ion-label>
         <ion-input color="secondary" type="password" formControlName="password"></ion-input>
       </ion-item>
       <p class="ion-no-margin text08 msg" *ngIf="f.password.errors && hasError">
         <ion-text color="light" *ngIf="f.password.errors.required">
-          {{ 'auth.form.error.password'  }}
+          Password è un campo obbligatorio
         </ion-text>
         <ion-text color="light" *ngIf="f.password.errors.minlength"> 
-          {{ 'auth.form.error.password.minlength'  }}
+          Password deve contenere almeno 6 caratteri
         </ion-text>
       </p>
     </form>
 
     <p tappable (click)="forgotPass()" class="ion-text-right paz">
       <ion-text color="light">
-        <strong>{{ 'auth.form.label.forgot'  }}</strong>
+        <strong>Mi sono dimenticato la password</strong>
       </ion-text>
     </p>
 
@@ -58,12 +56,15 @@
       <ion-button size="large" expand="full" shape="round" color="dark" (click)="login(loginForm)">
         <!-- [disabled]="isOffline" -->
         <ion-icon name="log-in" slot="end"></ion-icon>
-        {{ 'auth.button.login'  }}
+        Entra
       </ion-button>
 
       <p class="ion-text-center ion-no-margin ion-margin-top">
         <ion-text color="light">
-          {{ 'auth.login.text'  }}
+          <h2>Oppure entra con un tuo account Social </h2>
+        </ion-text>
+        <ion-text color="light">
+          <h6>Per il momento puoi usare solo il tuo account Google o Gmail cliccando la G rossa</h6>
         </ion-text>
       </p>
 
@@ -80,7 +81,7 @@
             </ion-button>
           </ion-col> -->
           <ion-col size="6" offset="3">
-            <ion-button color="google" shape="round" expand="full" (click)="loginWithGoogle()">
+            <ion-button color="danger" shape="round" expand="full" (click)="loginWithGoogle()">
               <ion-icon slot="icon-only" name="logo-google"></ion-icon>
             </ion-button>
           </ion-col>
