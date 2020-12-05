@@ -3,18 +3,22 @@ service cloud.firestore {
   match /databases/{database}/documents {
   	match /users {
       allow read
-      match /{user} {
+      match /{userId} {
           allow read: if (request.auth.uid != null)
           allow write: if (request.auth.uid != null)
       }
     }
-    match /fitbit/{user} {
+    match /fitbit/{userId} {
         allow read
-        allow write: if ((request.auth.uid != null))
+        allow write: if (request.auth.uid != null)
     }
-    match /fitbit/{user}/{document=**} {
+    match /teams/{teamId} {
+        allow read: if (request.auth.uid != null)
+        allow write: if (request.auth.token.email == resource.data.admin)
+    }
+    match /fitbit/{userId}/{document=**} {
         allow read
-        allow write: if ((request.auth.uid != null))
+        allow write: if (request.auth.uid != null)
     }
     match /{document=**} {
       allow read, write: if false;

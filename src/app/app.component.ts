@@ -25,7 +25,22 @@ export class AppComponent implements OnInit {
     {
       title: 'Dispositivo',
       url: '/tracker/register',
-      icon: 'paper-plane'
+      icon: 'watch'
+    },
+    {
+      title: 'Gestisci una squadra',
+      url: '/teams/manage-team',
+      icon: 'add-circle'
+    },
+    {
+      title: 'Cerca una squadra',
+      url: '/teams/search-team',
+      icon: 'search-circle'
+    },
+    {
+      title: 'Cerca una sfida',
+      url: '/challenges/search-challenge',
+      icon: 'barbell'
     }
   ];
   public labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
