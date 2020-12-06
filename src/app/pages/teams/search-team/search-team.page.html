@@ -1,9 +1,30 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>search-team</ion-title>
+    <ion-buttons slot="start"> 
+      <ion-menu-button></ion-menu-button> 
+    </ion-buttons> 
+    <ion-title>Cerca un team</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
 
+  <ion-card *ngFor="let team of teams$ | async">
+    <ion-card-header>
+      <ion-card-subtitle>Amministratore: {{team.admin}}</ion-card-subtitle>
+      <ion-card-title>{{team.name}}</ion-card-title>
+    </ion-card-header>
+  
+    <ion-card-content>
+      {{team.description}}
+    </ion-card-content>
+    <ion-item>
+      <ion-button slot="end" href="/teams/manage-team/{{team.teamId}}"> 
+        Guarda
+      </ion-button>
+      <ion-button slot="end">Entra
+        <ion-icon slot="icon-only" name="add"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-card>
 </ion-content>

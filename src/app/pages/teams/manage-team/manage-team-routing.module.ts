@@ -7,7 +7,11 @@ const routes: Routes = [
   {
     path: '',
     component: ManageTeamPage
-  }
+  },
+  {
+    path: ':teamId',
+    component: ManageTeamPage
+  },
 ];
 
 @NgModule({

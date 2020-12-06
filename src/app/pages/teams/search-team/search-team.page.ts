@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { TeamService } from 'src/app/services';
+import { Observable } from 'rxjs';
+import { Team } from 'src/app/models/team';
 
 @Component({
   selector: 'app-search-team',
@@ -7,9 +10,12 @@ import { Component, OnInit } from '@angular/core';
 })
 export class SearchTeamPage implements OnInit {
 
-  constructor() { }
+  teams$ : Observable<Team[]>
+
+  constructor(public teamService: TeamService) { }
 
   ngOnInit() {
+    this.teams$ = this.teamService.getTeams().valueChanges();
   }
 
 }
