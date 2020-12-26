@@ -149,7 +149,7 @@ export class AuthService {
     return new Promise((resolve, reject) => {
       const gprovider = new firebase.auth.GoogleAuthProvider();
 
-      this.afAuth.signInWithRedirect(gprovider).then(res => {
+      this.afAuth.signInWithPopup(gprovider).then(res => {
         resolve(res);
       }).catch((e) => {
         reject(e);
